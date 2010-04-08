@@ -1,11 +1,10 @@
 To build and run this app you need to have
 
-1) Java JDK 6
-   http://java.sun.com/javase/downloads/index.jsp
-2) Ant 1.7
-   http://ant.apache.org/bindownload.cgi
-3) Google App Engine SDK
-   http://code.google.com/appengine/downloads.html
+# Java JDK 6 http://java.sun.com/javase/downloads/index.jsp
+
+# Ant 1.7 http://ant.apache.org/bindownload.cgi
+
+# Google App Engine SDK http://code.google.com/appengine/downloads.html
 
 Either place the appengine-sdk two levels above this directory
 or edit build.xml (line 2) to point to it.
