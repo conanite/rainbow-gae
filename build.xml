@@ -70,7 +70,7 @@
     </dev_appserver>
   </target>
 
-  <target name="update" description="Uploads the application, including indexes">
+  <target name="update" depends="compile" description="Uploads the application, including indexes">
     <appcfg action="update" war="${war.dir}"/>
   </target>
 

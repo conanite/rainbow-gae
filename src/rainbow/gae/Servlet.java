@@ -76,6 +76,10 @@ public class Servlet extends HttpServlet {
 
   private Pair buildCookies(Cookie[] cookies) {
     Pair result = NIL;
+    if (cookies == null) {
+      return result;
+    }
+
     for (Cookie cookie : cookies) {
       String name = cookie.getName();
       String value = cookie.getValue();
