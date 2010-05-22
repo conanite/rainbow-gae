@@ -2,7 +2,8 @@
   '(lib/html
     lib/srv
     lib/app
-    lib/lib/parser))
+    lib/lib/parser
+    lib/rainbow/persistence))
 
 (def file-join parts
   (apply + parts))

@@ -1,4 +1,4 @@
-// Copyright (c) 2010 Jeffrey D. Brennan
+// Copyright (c) 2010 Jeffrey D. Brennan, Conan Dalton
 //
 // License: http://www.opensource.org/licenses/mit-license.php
 
@@ -15,14 +15,12 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.util.Map;
 
 public class Servlet extends HttpServlet {
   private static final Pair NIL = ArcObject.NIL;
+  static final Symbol RESPOND = Symbol.mkSym("respond");
 
   public void init()
           throws ServletException {
@@ -42,26 +40,17 @@ public class Servlet extends HttpServlet {
     }
   }
 
-  static final Symbol RESPOND = Symbol.mkSym("respond");
 
   public void doGet(HttpServletRequest request, HttpServletResponse response)
           throws IOException, ServletException {
     VM vm = new VM();
-    System.out.println("inside doGet");
     if (request.getParameter("reload") != null) init(); // For rapid testing
 
-    // we're going to invoke (def respond (str op args cooks ip)
+    // we're going to invoke (respond str op args cooks ip)
     String uri = request.getRequestURI();
-    System.out.println("doGet " + uri);
-
     Symbol op = Symbol.mkSym(uri.substring(1)); // uri "/foo" -> op "foo"
-
     Pair args = buildArgs(request.getParameterMap());
-    System.out.println("args are " + args);
-
     Pair cooks = buildCookies(request.getCookies());
-    System.out.println("cooks are " + cooks);
-
     ArcString ip = ArcString.make(request.getRemoteAddr());
     ArcObject respond = RESPOND.value();
     OutputStream str = new ServletOutput(response);
@@ -70,7 +59,11 @@ public class Servlet extends HttpServlet {
     } catch (ThreadDeath td) {
       throw td;
     } catch (Throwable e) {
-      new PrintStream(response.getOutputStream()).print(e);
+      PrintStream ps = new PrintStream(response.getOutputStream());
+      System.out.println(e);
+      e.printStackTrace(System.out);
+      ps.print(e);
+      e.printStackTrace(ps);
     }
   }
 

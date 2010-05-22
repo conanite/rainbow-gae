@@ -1,3 +1,7 @@
+// Copyright (c) 2010 Conan Dalton
+//
+// License: http://www.opensource.org/licenses/mit-license.php
+
 package rainbow.gae;
 
 import javax.servlet.ServletOutputStream;

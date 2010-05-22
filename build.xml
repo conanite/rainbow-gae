@@ -1,4 +1,4 @@
-<project name="winerecord" default="compile">
+<project name="blog-demo" default="compile">
   <property name="appengine.sdk" location="lib/appengine-sdk"/>
   <fail message="Please define the appengine.sdk property to point to your SDK directory">
     <condition>
@@ -27,13 +27,7 @@
     </copy>
   </target>
 
-  <target name="mkjdo" depends="copyjars" description="Create JDO classes">
-    <java jar="${war.dir}/WEB-INF/lib/rainbow.jar" fork="true" dir="src">
-      <arg line="--no-libs -f ../war/lib/arc -f ../war/lib/strings -f mkjdo -q -args wine.sml wine"/>
-    </java>
-  </target>
-
-  <target name="compile" depends="mkjdo" description="Compile the application">
+  <target name="compile" description="Compile the application">
     <javac srcdir="src" destdir="${war.dir}/WEB-INF/classes" debug="on">
       <classpath>
         <fileset dir="${war.dir}/WEB-INF/lib">
