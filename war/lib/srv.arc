@@ -207,7 +207,7 @@ Connection: close"))
 (= unknown-msg* "Unknown." max-age* (table) static-max-age* nil)
 
 (def respond (str op args cooks ip)
-  (on-err (fn (ex) (w/stdout (stderr) (prn "error for request " op " with args " args " : " (details ex))))
+  (on-err (fn (ex) (w/stdout (stderr) (prn "error for request " op " with args " args " :\n" (details ex))))
           (fn () (respond-unsafe str op args cooks ip))))
 
 (def respond-unsafe (str op args cooks ip)

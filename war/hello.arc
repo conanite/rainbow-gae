@@ -1,11 +1,24 @@
 
+(def extract-arg-names (args)
+  (flat:afnwith (args args o? nil)
+    (if args
+        (if atom.args
+            args
+            (let arg car.args
+              (if atom.arg
+                  (if (or no.o? (isnt arg 'o))
+                      (cons arg (self cdr.args nil))
+                      cadr.args)
+                  (cons (self car.args t)
+                        (self cdr.args nil))))))))
+
 (unless (bound 'unsafe-def)
   (assign unsafe-def def)
   (mac def (name args . body)
     `(unsafe-def ,name ,args
        (on-err (fn (ex) (err:string "error in "
                                     ',name 
-                                    (tostring:pr:list ,@(flat args)) 
+                                    (tostring:pr:list ,@(extract-arg-names args)) 
                                     "\n"
                                     (details ex)))
                (fn ()   ,@body)))))
@@ -203,17 +216,18 @@
   "/archive")
 
 (def show-article (article)
-  (tag h3 (pr-escaped (article 'title)))
+  (tag h3 
+    (link (article 'title) "/article?id=#((article 'id))"))
   (tag small 
     (pr (article 'created-at))
     (aif (article 'author)
-      (pr "by " it)))
+      (pr " by " it)))
   (tag p (pr-escaped (article 'content)))
   (tag p (link "delete" "/delete-article?id=#((article 'id))")))
 
 (blogop article req user
   (blogpage user
-    (let art (find-entity "article" 'id '= (arg req "id"))
+    (let art (get-entity 'article (int:arg req "id"))
       (show-article art))))
 
 (blogop archive req user
