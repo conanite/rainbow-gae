@@ -10,10 +10,6 @@
     <servlet-name>RainbowServlet</servlet-name>
     <servlet-class>rainbow.gae.Servlet</servlet-class>
     <init-param>
-      <param-name>init.uri</param-name>
-      <param-value>/hello.arc</param-value>
-    </init-param>
-    <init-param>
       <param-name>welcome.uri</param-name>
       <param-value>/home</param-value>
     </init-param>

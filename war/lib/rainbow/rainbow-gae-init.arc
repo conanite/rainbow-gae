@@ -3,7 +3,8 @@
     lib/srv
     lib/app
     lib/lib/parser
-    lib/rainbow/persistence))
+    lib/rainbow/persistence
+    lib/rainbow/security))
 
 (def file-join parts
   (apply + parts))
