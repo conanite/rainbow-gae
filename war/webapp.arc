@@ -112,10 +112,10 @@
   "/archive")
 
 (defopr new-user req
-  (let user (obj login    (arg req "login")
-                 password (sha1:arg req "password"))
-    (persist (hash-to-entity user 'user))
-    (authenticate req)))
+  ((new-entity 'user 
+    'login (arg req "login")
+    'password (sha1:arg req "password")) 'save)
+  (authenticate req))
 
 (blogop newpost req user
   (blogpage user
