@@ -43,17 +43,18 @@
     (arcify e)))
 
 (def arcify (entity)
-  (afn args
-    (case car.args
-      save     ((datastore) 'put entity)
-      id       (entity!getKey 'getId)
-      kind     (entity!getKey 'getKind)
-      is-new   (is (self 'id) nil)
-      delete   (unless (self 'is-new)
-                 ((datastore) 'delete (list entity!getKey)))
-               (aif cadr.args
-                 (entity 'setProperty car.args cadr.args)
-                 (entity 'getProperty car.args)))))
+  (if entity
+    (afn args
+      (case car.args
+        save     ((datastore) 'put entity)
+        id       (entity!getKey 'getId)
+        kind     (entity!getKey 'getKind)
+        is-new   (is (self 'id) nil)
+        delete   (unless (self 'is-new)
+                   ((datastore) 'delete (list entity!getKey)))
+                 (aif cadr.args
+                   (entity 'setProperty car.args cadr.args)
+                   (entity 'getProperty car.args))))))
 
 
 
