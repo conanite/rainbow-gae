@@ -105,6 +105,9 @@
 (blogop signup req user
   (blogpage user (signup-form "/archive")))
 
+(blogop already-exists req user
+  (blogpage user (pr "login already exists")))
+
 (defopr authenticate req (authenticate req))
 
 (defopr logout req
@@ -112,10 +115,13 @@
   "/archive")
 
 (defopr new-user req
-  ((new-entity 'user 
-    'login (arg req "login")
-    'password (sha1:arg req "password")) 'save)
-  (authenticate req))
+  (if (find-entity 'user 'login '= (arg req "login"))
+    "/already-exists"
+    (do ((new-entity 'user 
+                     'login (arg req "login")
+                     'password (sha1:arg req "password")) 
+                     'save)
+        (authenticate req))))
 
 (blogop newpost req user
   (blogpage user
@@ -140,26 +146,28 @@
     'save)
   "/archive")
 
-(def show-article (article)
+(def show-article (article active-user)
   (tag h3 
-    (link (article 'title) "/article?id=#((article 'id))"))
+    (link (article 'title) 
+          "/article?id=#((article 'id))"))
   (tag small 
     (pr (article 'created-at))
-    (aif (article 'author)
-      (pr " by " it)))
+    (pr " by " (article 'author)))
   (tag p (pr-escaped (article 'content)))
-  (tag p (link "delete" "/delete-article?id=#((article 'id))")))
+  (if (is article!author active-user!login)
+      (tag p (link "delete" 
+                   "/delete-article?id=#((article 'id))"))))
 
 (blogop article req user
   (blogpage user
     (let art (get-entity 'article (int:arg req "id"))
-      (show-article art))))
+      (show-article art user))))
 
 (blogop archive req user
   (blogpage user
     (tag ul
       (each entity (find-entities 'article)
-        (tag li (show-article entity))))))
+        (tag li (show-article entity user))))))
 
 (blogop users req user
   (blogpage user

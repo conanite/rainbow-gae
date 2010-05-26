@@ -1,31 +1,56 @@
 (java-imports com.google.appengine.api.datastore
-  Query Query$FilterOperator FetchOptions FetchOptions$Builder
+  Query Query$SortDirection Query$FilterOperator
+  FetchOptions FetchOptions$Builder
   DatastoreServiceFactory Entity)
 
 (def datastore () DatastoreServiceFactory.getDatastoreService)
 
-(withs (operators (obj <  Query$FilterOperator.LESS_THAN
-                       <= Query$FilterOperator.LESS_THAN_OR_EQUAL
-                       =  Query$FilterOperator.EQUAL
-                       >  Query$FilterOperator.GREATER_THAN_OR_EQUAL
-                       >= Query$FilterOperator.GREATER_THAN
-                       != Query$FilterOperator.NOT_EQUAL)
-        prepare-query (fn (kind properties)
-          (with (q (Query new kind)
-                 pp (tuples properties 3))
-            (each (k op v) pp
-              (q 'addFilter k operators.op v))
-            ((datastore) 'prepare q))))
+(def query-filter (operator)
+  (fn (q fetch props) 
+      (q 'add-filter car.props operator cadr.props)
+      (build-query q fetch cddr.props)))
 
-  (def find-entities (kind . properties)
-    (map arcify ((prepare-query kind properties) 'asList (fetch-options))))
+(assign query-builders (obj
+  <    (query-filter Query$FilterOperator.LESS_THAN)
+  <=   (query-filter Query$FilterOperator.LESS_THAN_OR_EQUAL)
+  ==   (query-filter Query$FilterOperator.EQUAL)
+  >    (query-filter Query$FilterOperator.GREATER_THAN_OR_EQUAL)
+  >=   (query-filter Query$FilterOperator.GREATER_THAN)
+  !=   (query-filter Query$FilterOperator.NOT_EQUAL)
+  desc (fn (q fetch props)
+           (q 'addSort car.props Query$SortDirection.DESCENDING)
+           (build-query q fetch cdr.props))
+  asc  (fn (q fetch props)
+           (q 'addSort car.props)
+           (build-query q fetch cdr.props))
+  page (fn (q fetch props)
+           (with (page car.props per-page cadr.props)
+             (fetch 'offset (* (- page 1) per-page))
+             (fetch 'limit per-page))
+           (build-query q fetch cddr.props))
+))
 
-  (def find-entity (kind . properties)
-    (arcify ((prepare-query kind properties) 'asSingleEntity)))
+(def build-query (q fetch props)
+  (if props
+    ((query-builders car.props) q cdr.props)
+    q))
 
-  (def count-entities (kind . properties)
-    ((prepare-query kind properties) 'countEntities))
-)
+(def prepare-query (kind props (o fetch nilfn))
+  ((datastore) 'prepare (build-query (Query new kind) fetch props)))
+
+(def find-entities (kind . properties)
+  (let f (fetch-options)
+    (map arcify 
+         ((prepare-query kind properties f) 'asList f))))
+
+(def find-entity (kind . properties)
+  (arcify ((prepare-query kind properties) 'asSingleEntity)))
+
+(def count-entities (kind . properties)
+  ((prepare-query kind properties) 'countEntities))
+
+(def debug-find (kind . properties)
+  ((prepare-query kind properties) 'toString))
 
 (def get-entity (kind id)
   (arcify ((datastore) 'get (KeyFactory 'createKey kind id))))
