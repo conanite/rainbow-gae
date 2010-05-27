@@ -7,7 +7,7 @@
 
 (def query-filter (operator)
   (fn (q fetch props) 
-      (q 'add-filter car.props operator cadr.props)
+      (q 'addFilter car.props operator cadr.props)
       (build-query q fetch cddr.props)))
 
 (assign query-builders (obj
@@ -32,7 +32,7 @@
 
 (def build-query (q fetch props)
   (if props
-    ((query-builders car.props) q cdr.props)
+    ((query-builders car.props) q fetch cdr.props)
     q))
 
 (def prepare-query (kind props (o fetch nilfn))

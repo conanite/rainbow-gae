@@ -44,8 +44,8 @@
   (credentials-form "/authenticate" return-to))
 
 (def authenticate (req)
-  (aif (find-entity "user" 'login    '= (arg req "login")
-                           'password '= (sha1:arg req "password"))
+  (aif (find-entity "user" '== 'login    (arg req "login")
+                           '== 'password (sha1:arg req "password"))
     (with (token (rand-string 20))
       ((new-entity 'token 'cookie token 'user (it 'login)) 'save)
       (prcookie token)))
@@ -68,8 +68,10 @@
       (link "signup" ))))
 
 (def active-user (req)
-  (aif (find-entity "token" 'cookie '= (alref req!cooks "user"))
-    (find-entity "user" 'login '= (it 'user))))
+  (aif (find-entity "token" 
+                    '== 'cookie (alref req!cooks "user"))
+    (find-entity "user"
+                 '== 'login (it 'user))))
 
 (mac blogpage (user . body)
   `(whitepage
@@ -115,7 +117,8 @@
   "/archive")
 
 (defopr new-user req
-  (if (find-entity 'user 'login '= (arg req "login"))
+  (if (find-entity 'user 
+                   '== 'login (arg req "login"))
     "/already-exists"
     (do ((new-entity 'user 
                      'login (arg req "login")
@@ -152,7 +155,9 @@
           "/article?id=#((article 'id))"))
   (tag small 
     (pr (article 'created-at))
-    (pr " by " (article 'author)))
+    (pr " by " )
+    (link (article 'author)
+              "/by?author=#(article!author)"))
   (tag p (pr-escaped (article 'content)))
   (if (is article!author active-user!login)
       (tag p (link "delete" 
@@ -167,6 +172,13 @@
   (blogpage user
     (tag ul
       (each entity (find-entities 'article)
+        (tag li (show-article entity user))))))
+
+(blogop by req user
+  (blogpage user
+    (tag ul
+      (each entity (find-entities 'article
+                     '== 'author (arg req "author"))
         (tag li (show-article entity user))))))
 
 (blogop users req user
